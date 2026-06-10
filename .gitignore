@@ -1,0 +1,11 @@
+# Build output
+build/
+
+# Compiled objects
+*.o
+*.obj
+*.exe
+
+# CMake files
+CMakeCache.txt
+CMakeFiles/

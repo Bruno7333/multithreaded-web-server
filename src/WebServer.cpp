@@ -1,5 +1,6 @@
 #include "WebServer.hpp"
 #include <iostream>
+#include <cstring>
 
 // m_port(port) sets m_port to the value of port, without wasting an extra initialization
 WebServer::WebServer(int port) : m_port(port), m_listenerSocket(INVALID_SOCKET) {}
@@ -65,5 +66,25 @@ void WebServer::start(){
 
 // accept and respond to requests
 void WebServer::run(){
+    while (true){
+        SOCKET clientSocket = accept(m_listenerSocket, nullptr, nullptr);
+        //Continually accept requests from the backlog queue from the listener socket
+        // returns a different socket while m_listenerSocket keeps listening for future clients
+        // accept freezes the program until someone connects, single thread bottleneck
+        // might pass in sockaddr_in later rather than nullptr to log client IPs
+        //no exit condition yet, ConsoleThread will implement add later
+        if(clientSocket == INVALID_SOCKET) continue;
+        // failure guard, wont crash if something goes wrong
 
+        const char* response =
+            "HTTP/1.1 200 OK\r\n"
+            "Content-Type: text/plain\r\n"
+            "Content-Length: 12\r\n"
+            "\r\n"
+            "Hello World!";
+        // hardcoded placeholder response
+        
+        send(clientSocket, response, (int)strlen(response), 0);
+        closesocket(clientSocket);
+    }
 }
