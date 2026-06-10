@@ -32,7 +32,38 @@ void WebServer::start(){
 
     // Bind to port
     sockaddr_in serverAddr{};
-    
+    // Predefined struct from winsock2.
+    // Declaring socket address struct, (socketaddress_internet). has fields for address family, port, and IP address
+    serverAddr.sin_family = AF_INET;
+    // socket internet <-> sin
+    // address family for the socket, same as as what was used above
+    serverAddr.sin_port = htons(m_port);
+    // htons <-> host to network short, convert CPU byte order to network byte order
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+    // sin_addr.s_addr is the IP address to bind to
+    // INADDR_ANY is a special value that means  listen on all network interfaces, server is reachable however a client tries to reach it.
+    // to accept only local connections, bind would be 127.0.0.1
+    if(bind(m_listenerSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR){
+        //m_listenerSocket -> socket we want to bind to
+        //(sockaddr*)&serverAddr a pointer to the address struct, expects sockaddr* intead of sockaddr_in* so we had to cast the type
+        //sizeof(serverAddr) tells bind how big the struct is, so we know how much to read
+        std::cerr << "bind() failed: " << WSAGetLastError() << "\n";
+        return;
+    }
 
     // Start listening
+    if(listen(m_listenerSocket, SOMAXCONN) == SOCKET_ERROR){
+    // listen turns the socket from idle, into one that is waiting for incoming connections.
+    // SOMAXCONN is the backlong: maximum number of connections that can sit on the "wait to be accepted" queue at once
+    // SOMAXCONN -> SOcket MAXimum CONNections. os picks a good maximum amount of connections
+        std::cerr << "listen() failed: " << WSAGetLastError() << "\n";
+        return;
+    }
+
+    std::cout << "Server listening on port " << m_port << "\n";
+}
+
+// accept and respond to requests
+void WebServer::run(){
+
 }
